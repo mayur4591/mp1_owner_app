@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:owner_app/Screens/AuthenticationScreens/loginScreen.dart';
 import 'package:owner_app/Screens/HomeScreens/homeScreen.dart';
 import 'package:owner_app/Screens/New%20Product/productImage.dart';
+import 'package:owner_app/Screens/Owner/My_information.dart';
 
 import '../CartScreen/cartScreen.dart';
 import 'navigation_drawer.dart';
@@ -67,30 +70,35 @@ class _OwnerProfileState extends State<OwnerProfile> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
-                  margin: const EdgeInsets.only(left: 5),
-                  height: 55,
-                  width: MediaQuery.of(context).size.width / 2.3,
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blueGrey),
-                      borderRadius: BorderRadius.circular(10)),
-                  // margin: const EdgeInsets.only(left: 10.0,right: 18.0),
-                  child: const ListTile(
-                    horizontalTitleGap: 2,
-                     leading: Icon(
-                        Icons.info_outline,
-                        color: Colors.pink,
-                        size: 18,
-                      ),
-                      title:Text(
-                        'My information',
-                        style: TextStyle(
-                            color: Colors.blueGrey,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
-                      ),
-                  ),
+                GestureDetector(
+                  onTap: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const MyInformation()));
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 5),
+                    height: 55,
+                    width: MediaQuery.of(context).size.width / 2.3,
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blueGrey),
+                        borderRadius: BorderRadius.circular(10)),
+                    // margin: const EdgeInsets.only(left: 10.0,right: 18.0),
+                    child: const ListTile(
+                      horizontalTitleGap: 2,
+                       leading: Icon(
+                          Icons.info_outline,
+                          color: Colors.pink,
+                          size: 18,
+                        ),
+                        title:Text(
+                          'My information',
+                          style: TextStyle(
+                              color: Colors.blueGrey,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold),
+                        ),
+                    ),
 
+                  ),
                 ),
                 GestureDetector(
                     onTap: () {
@@ -133,8 +141,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
               children: [
                 GestureDetector(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const HomeScren()));
-
+                  Navigator.pop(context);
                   },
                   child: Container(
                     // margin: const EdgeInsets.only(left: 5),
@@ -253,30 +260,36 @@ class _OwnerProfileState extends State<OwnerProfile> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    margin: const EdgeInsets.only(left: 25,bottom: 40),
-
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: const [
-                        Icon(
-                          Icons.logout,
-                          color: Colors.blueGrey,
-                          size: 20,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          'Log out',
-                          style: TextStyle(
-                              color: Colors.blueGrey,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                  GestureDetector(
+                    onTap: (){
+                      FirebaseAuth.instance.signOut().then((value) => {
+                        Navigator.popUntil(context, (route) => false),
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=> const LoginScreen()))
+                      });
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 25,bottom: 40),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: const [
+                          Icon(
+                            Icons.logout,
+                            color: Colors.blueGrey,
+                            size: 20,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Log out',
+                            style: TextStyle(
+                                color: Colors.blueGrey,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
                     ),
-
                   ),
                 ],
               ),

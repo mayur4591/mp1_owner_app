@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:owner_app/Screens/AuthenticationScreens/loginScreen.dart';
 import 'package:owner_app/Screens/HomeScreens/homeScreen.dart';
 import 'package:owner_app/Screens/New%20Product/productImage.dart';
+import 'package:owner_app/Screens/Owner/EditProfile.dart';
+import 'package:owner_app/Screens/Owner/My_information.dart';
 import 'package:owner_app/Screens/Owner/OwnerProfile.dart';
 
 Future<void> main() async {
@@ -39,11 +42,23 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  bool isSignedIn=false;
 
+  checkLoginStatus()
+  {
+    isSignedIn=FirebaseAuth.instance.currentUser!=null;
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkLoginStatus();
+  }
+    
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: LoginScreen(),
+    return  Scaffold(
+      body: isSignedIn?const HomeScren():const LoginScreen(),
     );
   }
 }

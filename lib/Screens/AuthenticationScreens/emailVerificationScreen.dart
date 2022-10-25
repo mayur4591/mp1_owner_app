@@ -156,7 +156,10 @@ class _EmailVerificationState extends State<EmailVerification> {
       'first_name': data.first_name,
       'last_name': data.last_name,
       'email': data.email,
-      'role': data.role
+      'role': data.role,
+      'shop_name':data.shopName,
+      'mobile_number':data.mobile_number,
+      'shop_address':data.shop_address
     }).onError((error, stackTrace) {
       print(error);
     }).then((value) => {
@@ -164,7 +167,11 @@ class _EmailVerificationState extends State<EmailVerification> {
         'first_name': data.first_name,
         'last_name': data.last_name,
         'email': data.email,
-        'role': data.role
+        'role': data.role,
+        'shop_name':data.shopName,
+        'mobile_number':data.mobile_number,
+        'shop_address':data.shop_address
+
       })
     });
   }

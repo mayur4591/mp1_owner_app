@@ -21,6 +21,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController shopNameController=TextEditingController();
+  TextEditingController phoneNumberController=TextEditingController();
+  TextEditingController shopAddressController=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +107,102 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                 ),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    controller:phoneNumberController ,
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.phone,
+                        color: Colors.white.withOpacity(0.6),
+                        size: 20,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      hintText: 'Phone number',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                            width: 1,
+                            color:
+                            Colors.white.withOpacity(0.6)), //<-- SEE HERE
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(
+                            width: 1, color: Colors.white), //<-- SEE HERE
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    controller: shopNameController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.email_outlined,
+                        color: Colors.white.withOpacity(0.6),
+                        size: 20,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      hintText: 'Shop Name',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                            width: 1,
+                            color:
+                            Colors.white.withOpacity(0.6)), //<-- SEE HERE
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(
+                            width: 1, color: Colors.white), //<-- SEE HERE
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: TextField(
+                    cursorColor: Colors.white,
+                    style: const TextStyle(color: Colors.white),
+                    controller: shopAddressController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.location_on_outlined,
+                        color: Colors.white.withOpacity(0.6),
+                        size: 20,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      hintText: 'Shop address',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                            width: 1,
+                            color:
+                            Colors.white.withOpacity(0.6)), //<-- SEE HERE
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(
+                            width: 1, color: Colors.white), //<-- SEE HERE
+                      ),
+                    ),
+                  ),
+                ),
+
                 Container(
                   padding: const EdgeInsets.all(20),
                   child: TextField(
@@ -230,7 +329,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               lastnameController.text.isEmpty ||
                               emailController.text.isEmpty ||
                               passwordController.text.isEmpty ||
-                              confirmPasswordController.text.isEmpty) {
+                              confirmPasswordController.text.isEmpty||shopNameController.text.isEmpty || shopAddressController.text.isEmpty) {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(const SnackBar(
                               content: Text('Fill all the details...',style: TextStyle(color: Colors.black),),
@@ -250,7 +349,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 firstnameController.text.toString(),
                                 lastnameController.text.toString(),
                                 emailController.text.toString(),
-                                'owner');
+                                'owner',shopNameController.text,phoneNumberController.text,shopAddressController.text);
                             newuser = user;
                             registerUser(user);
                           }

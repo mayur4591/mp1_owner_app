@@ -72,6 +72,7 @@ class _DrawerState extends State<USerDrawer> {
           ),
           GestureDetector(
             onTap: (){
+              Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (context)=> const OwnerProfile()));
             },
             child: const ListTile(
