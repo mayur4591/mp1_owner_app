@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:owner_app/Screens/AuthenticationScreens/loginScreen.dart';
@@ -17,6 +18,25 @@ class OwnerProfile extends StatefulWidget {
 }
 
 class _OwnerProfileState extends State<OwnerProfile> {
+  String fname="";
+  String lname="";
+  String email="";
+  Future<void> getInfo() async {
+    FirebaseDatabase.instance.reference().child('Users/all_users/${FirebaseAuth.instance.currentUser!.uid}').once().then((value) => {
+      setState((){
+        Map<dynamic,dynamic> map=value.snapshot.value as Map;
+        fname=map['first_name'];
+        lname=map['last_name'];
+        email=map['email'];
+      }),
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getInfo();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,17 +65,17 @@ class _OwnerProfileState extends State<OwnerProfile> {
                         Icons.arrow_back,
                         color: Colors.white,
                       )),
-                  const ListTile(
+                   ListTile(
                     title: Text(
-                      'Mayur Kamble',
-                      style: TextStyle(
+                      '$fname $lname',
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      'mayurkamble847@gmail.com',
-                      style: TextStyle(
+                      email,
+                      style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.w500),
@@ -225,31 +245,7 @@ class _OwnerProfileState extends State<OwnerProfile> {
                       )
                   ),
                 )
-                // GestureDetector(
-                //   onTap: (){
-                //     Navigator.push(context, MaterialPageRoute(builder: (context)=> const ProductInfoPage()));
-                //   },
-                //   child: Container(
-                //       margin: const EdgeInsets.only(right: 5),
-                //       height: 55,
-                //       width: MediaQuery.of(context).size.width / 2.3,
-                //       decoration: BoxDecoration(
-                //           color: Colors.blueGrey,
-                //           // border: Border.all(color: Colors.black),
-                //           borderRadius: BorderRadius.circular(10)),
-                //       // margin: const EdgeInsets.only(left: 10.0,right: 18.0),
-                //       child:const Center(
-                //         child:Text(
-                //           'Publish New Product',
-                //           style: TextStyle(
-                //               color: Colors.white,
-                //               fontSize: 16,
-                //               fontWeight: FontWeight.bold),
-                //         ),
-                //
-                //       )
-                //   ),
-                // )
+
               ],
             ),
             const SizedBox(

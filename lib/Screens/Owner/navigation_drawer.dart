@@ -15,9 +15,9 @@ class USerDrawer extends StatefulWidget {
 }
 
 class _DrawerState extends State<USerDrawer> {
-  String fname="Mayur";
-  String lname="Kamble";
-  String email="mayurkamble847@gmail.com";
+  String fname="";
+  String lname="";
+  String email="";
   Future<void> getInfo() async {
     FirebaseDatabase.instance.reference().child('Users/all_users/${FirebaseAuth.instance.currentUser!.uid}').once().then((value) => {
       setState((){
@@ -30,11 +30,24 @@ class _DrawerState extends State<USerDrawer> {
       print(fname)
     });
   }
+  int orderRequest=0;
+  Future requestCount() async
+  {
+      FirebaseDatabase.instance.reference().child('Users/owners/${FirebaseAuth.instance.currentUser!.uid}/order_request').once().then((value) => {
+        if(value.snapshot.value!=null)
+          {
+            setState((){
+              orderRequest=value.snapshot.children.length;
+            })
+          }
+      });
+  }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    //getInfo();
+    getInfo();
+    requestCount();
   }
 
   @override
@@ -114,7 +127,7 @@ class _DrawerState extends State<USerDrawer> {
                   size: 18,
                 ),
                 trailing: Badge(
-                  badgeContent: Text('${productList.length}'),
+                  badgeContent: Text(orderRequest.toString()),
                   badgeColor: Colors.blueGrey.withOpacity(0.7),
                 )),
           )

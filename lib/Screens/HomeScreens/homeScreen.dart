@@ -1,3 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../Models/category.dart';
@@ -15,44 +18,29 @@ class HomeScren extends StatefulWidget {
 List<Category> category = [];
 
 class _HomeScrenState extends State<HomeScren> {
-  Product p1 = Product("assets/images/chair.jpg", "White Chair", "450", 3);
-  Product p2 = Product("assets/images/cubured.jpg", "Cupboard", "14,450", 4);
-  Product p3 = Product("assets/images/kingchair.jpg", "King Chair", "1450", 5);
-  Product p4 = Product("assets/images/sofa.jpg", "Red sofa set", "20,550", 4);
-  Product p5 =
-      Product("assets/images/sofachair.jpg", "Ocen blue sofa", "3450", 5);
-  Product p6 =
-      Product("assets/images/swingchair.jpg", "Swing chair", "2450", 3);
-  Product p7 = Product("assets/images/table.jpg", "Wooden Table", "7450", 5);
-  Product p8 = Product("assets/images/workdesk.jpg", "Working desk", "9450", 4);
-
-  Category c1 = Category("Tables", "assets/images/tablecategorie.jpg");
-  Category c2 = Category("Couches", "assets/images/couchcategory.jpg");
-  Category c3 = Category("Sofas", "assets/images/sofacategory.jpg");
-  Category c4 = Category("Cupboards", "assets/images/cupboardcategory.jpg");
-  Category c5 = Category("Chairs", "assets/images/chaircategory.jpg");
-  Category c6 = Category("Benches", "assets/images/benchcategory.jpg");
 
   List<Product> productList = [];
+  late Query _ref;
+  bool isListEmpty=false;
+
+  Future check() async
+  {
+        _ref.once().then((value) => {
+          if(value.snapshot.value==null)
+            {
+              setState((){
+                isListEmpty=true;
+              })
+            }
+        });
+  }
 
   @override
   void initState() {
     // TODO: implement initState
-    category.add(c1);
-    category.add(c2);
-    category.add(c3);
-    category.add(c4);
-    category.add(c5);
-    category.add(c6);
-    productList.add(p1);
-    productList.add(p2);
-    productList.add(p3);
-    productList.add(p4);
-    productList.add(p5);
-    productList.add(p6);
-    productList.add(p7);
-    productList.add(p8);
     super.initState();
+    _ref=FirebaseDatabase.instance.reference().child('Users/all_users/${FirebaseAuth.instance.currentUser!.uid}/product_list');
+    check();
   }
 
   @override
@@ -61,40 +49,63 @@ class _HomeScrenState extends State<HomeScren> {
     print(size.width);
     print(size.height);
     return Scaffold(
-      drawer: const USerDrawer(),
-      appBar: AppBar(
         backgroundColor: const Color.fromRGBO(44, 53, 57, 1),
-        title: const Text(
-          'Published Products',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        drawer: const USerDrawer(),
+        appBar: AppBar(
+          backgroundColor: const Color.fromRGBO(44, 53, 57, 1),
+          title: const Text('My Products',style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500,fontSize: 20),),
         ),
-      ),
-      backgroundColor: const Color.fromRGBO(44, 53, 57, 1),
-      body: ListView.builder(
-          itemCount: productList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ProductDetails(
-                                      productList[index].image,
-                                      productList[index ].price,
-                                      productList[index].ratings,
-                                      productList[index].product_name)));
-                        },
-                        child: Container(
-                            padding: const EdgeInsets.all(10),
-                            child: boxes(
-                                name: productList[index].product_name,
-                                price: productList[index ].price,
-                                image: productList[index ].image,
-                                ratings: productList[index].ratings)),
-                      );
-          }),
+        body: isListEmpty==false?buildHome():
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(child: Text('No data present ',style: TextStyle(color: Colors.grey,fontSize: 15,fontWeight: FontWeight.w500),)),
+            SizedBox(height: 10,),
+            Center(child: Text('Published product will appear here ',style: TextStyle(color: Colors.grey,fontSize: 10,fontWeight: FontWeight.w500),)),
+
+          ],
+        )
     );
   }
+
+
+  Widget _buildListView(Map product) {
+    print(product.values);
+    print(product.length);
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ProductDetails(
+                    product['image_url'],
+                    product['product_price'],
+                    product['product_name'],
+                    product['product_details'],
+                    product['product_materials']
+                                    )));
+      },
+      child: Container(
+          padding: const EdgeInsets.all(10),
+          child: boxes(
+              name: product['product_name'],
+              price: product['product_price'],
+              image: product['image_url'],
+          )),
+    );
+  }
+
+  Widget buildHome() {
+    return FirebaseAnimatedList(
+        query: _ref,
+        itemBuilder: (BuildContext cotext, DataSnapshot snapshot,
+            Animation<double> animation, int index) {
+          Map<dynamic, dynamic>? owners = snapshot.value as Map?;
+          return _buildListView(owners!);
+        });
+  }
+
 }
 
 class DivederWidget extends StatelessWidget {
@@ -158,11 +169,10 @@ class boxes extends StatelessWidget {
       {required this.name,
       required this.price,
       required this.image,
-      required this.ratings});
+      });
 
   final String name;
   final String price;
-  final int ratings;
   final String image;
   @override
   Widget build(BuildContext context) {
@@ -180,7 +190,7 @@ class boxes extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: Image(
               fit: BoxFit.cover,
-              image: AssetImage(
+              image: NetworkImage(
                 image,
               ),
               // height: 120.0,
@@ -190,67 +200,67 @@ class boxes extends StatelessWidget {
           const SizedBox(
             width: 20.0,
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              const SizedBox(
-                height: 20.0,
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const SizedBox(
+                  height: 20.0,
+                ),
+                Text(
                   name,
+                  overflow: TextOverflow.clip,
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
                     color: Colors.white,
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Text(
-                "Rs." + price + "/-",
-                style: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 20),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.star,
-                    color: ratings >= 1 ? Colors.yellow : Colors.white,
-                    size: 15,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: ratings >= 2 ? Colors.yellow : Colors.white,
-                    size: 15,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: ratings >= 3 ? Colors.yellow : Colors.white,
-                    size: 15,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: ratings >= 4 ? Colors.yellow : Colors.white,
-                    size: 15,
-                  ),
-                  Icon(
-                    Icons.star,
-                    color: ratings >= 5 ? Colors.yellow : Colors.white,
-                    size: 15,
-                  )
-                ],
-              )
-            ],
+                const SizedBox(
+                  height: 15,
+                ),
+                Text(
+                  "Rs." + price + "/-",
+                  style: const TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 20),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                // Row(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: [
+                //     Icon(
+                //       Icons.star,
+                //       color: ratings >= 1 ? Colors.yellow : Colors.white,
+                //       size: 15,
+                //     ),
+                //     Icon(
+                //       Icons.star,
+                //       color: ratings >= 2 ? Colors.yellow : Colors.white,
+                //       size: 15,
+                //     ),
+                //     Icon(
+                //       Icons.star,
+                //       color: ratings >= 3 ? Colors.yellow : Colors.white,
+                //       size: 15,
+                //     ),
+                //     Icon(
+                //       Icons.star,
+                //       color: ratings >= 4 ? Colors.yellow : Colors.white,
+                //       size: 15,
+                //     ),
+                //     Icon(
+                //       Icons.star,
+                //       color: ratings >= 5 ? Colors.yellow : Colors.white,
+                //       size: 15,
+                //     )
+                //   ],
+                // )
+              ],
+            ),
           ),
           SizedBox(
             width: 30,
