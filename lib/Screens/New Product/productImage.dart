@@ -1,6 +1,9 @@
 
 import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -9,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:owner_app/Models/NewProduct.dart';
+import 'package:owner_app/Screens/HomeScreens/homeScreen.dart';
 import 'package:owner_app/Screens/New%20Product/ProductPublished.dart';
 
 class ProductInfoPage extends StatefulWidget {
@@ -25,15 +29,22 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
   final productMaterialsUsedController = TextEditingController();
   var product_2d_image;
   var product_glb_file;
+
   bool isloading=false;
- bool isImageSelected=false;
- bool isPublishing=false;
+  bool isImageSelected=false;
+  bool isglbFileSelected=false;
+  bool isPublishing=false;
+  bool isGlbloding=false;
+
+
   int _currentStep = 0;
-  bool isloding=false;
   var image_2d;
+  var glb_file;
+
   String image_url="";
   String glb_file_url="";
   String product_id="";
+
   Future publishProduct(NewProduct newProduct) async  {
     await FirebaseDatabase.instance.reference().child('Users/all_users/${FirebaseAuth.instance.currentUser!.uid}/product_list').push().once().then((value) => {
       setState((){
@@ -73,7 +84,9 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
         'product_id':product_id,
       })
     }).then((value) => {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const ProductPublished()))
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const HomeScren())),
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Your product has successfully Published',style: TextStyle(color: Colors.black,fontWeight: FontWeight.w500),),backgroundColor: Colors.white,))
+
     })
     });
 
@@ -101,14 +114,60 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
         });
       });
 
+  }
+
+
+  Future<void> getGlbFileAndUpload()async{
+
+    var rng = Random();
+
+    String randomName="";
+    for (var i = 0; i < 20; i++) {
+      print(rng.nextInt(100));
+      randomName += rng.nextInt(100).toString();
+    }
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    );
+    File file=File(result!.files.first.path.toString());
+    print(result.files.first.extension);
+    String fileName = '${randomName}.glb';
+    print(fileName);
+    print('${file.readAsBytesSync()}');
+    saveGlb(file.readAsBytesSync(), fileName);
+  }
+
+  Future<void> saveGlb(Uint8List asset, String name) async {
+    Reference reference = FirebaseStorage.instance
+        .ref()
+        .child('owner')
+        .child(FirebaseAuth.instance.currentUser!.uid)
+        .child(name);
+    SettableMetadata metadata =
+    SettableMetadata(
+      cacheControl: 'max-age=60',
+      contentType: 'glb'
+
+    );
+
+   await reference.putData(asset,metadata);
+
+        reference.getDownloadURL().then((value) {
+          setState(() {
+            glb_file_url=value;
+            print('Glb modal :- '+glb_file_url);
+              isglbFileSelected=true;
+              isGlbloding=false;
+          });
+        });
 
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Details'),
+          title: const Text('Details'),
           backgroundColor: Color.fromRGBO(44, 53, 57, 1),
         ),
         body: isPublishing? const PublishingScreen():SafeArea(
@@ -205,7 +264,9 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                             },
                               child: const Icon(Icons.cancel,color: Colors.grey,size: 18,)),
 
-                        )):GestureDetector(
+                        )
+                    ):
+                    GestureDetector(
                       onTap: (){
                         get_2d_Image().then((value) => {
                         setState(() {
@@ -247,56 +308,75 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
 
                  ),
                  Step(
-                    title: const Text('Upload GLB file of product (Optional)'),
-                    content: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'This will be used for Augumented Reality purpose.',
+                  title: const Text('Upload 3D modal of product(Optional)'),
+                  content:isglbFileSelected? Container(
+                      height: 50,
+                      width: MediaQuery.of(context).size.width / 1.4,
+                      decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10)),
+                      child:  ListTile(
+                        horizontalTitleGap: -15,
+                        leading:  const Icon(
+                          Icons.verified,
+                          color: Colors.blueGrey,
+                          size: 15,
+                        ),
+                        title: const Text(
+                          'Product modal selected',
                           style: TextStyle(
-                              color: Colors.blueGrey,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12, color: Colors.blueGrey),
                         ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Container(
-                            height: 120,
-                            width: MediaQuery.of(context).size.width / 1.4,
-                            decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(
-                                  Icons.upload_file_rounded,
-                                  color: Colors.grey,
-                                ),
-                                SizedBox(
-                                  height: 3,
-                                ),
-                                Text(
-                                  'Click here',
-                                  style: TextStyle(
-                                      fontSize: 10, color: Colors.blueGrey),
-                                )
-                              ],
-                            )),
+                        trailing: GestureDetector(
+                            onTap: (){
+                              setState(() {
+                                isglbFileSelected=false;
+                                glb_file="";
+                              });
+                            },
+                            child: const Icon(Icons.cancel,color: Colors.grey,size: 18,)),
 
-                        SizedBox(
-                          height: 5,
-                        ),
-                        const Text(
-                          'This will help user for better understanding of product,we recommend you to upload this but it is optional so you can think about it.',
-                          style: TextStyle(
-                              color: Colors.blueGrey,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    )),
+                      )
+                  ):
+                  GestureDetector(
+                    onTap: (){
+                      setState(() {
+                        isGlbloding=true;
+                      });
+                      getGlbFileAndUpload().then((value) => {
+
+                      });
+
+                    },
+                    child: isGlbloding?const SpinKitThreeBounce(
+                      size: 20,
+                      color: Colors.blueGrey,
+                    ):Container(
+                        height: 120,
+                        width: MediaQuery.of(context).size.width / 1.4,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(
+                              Icons.upload_file_rounded,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(
+                              height: 3,
+                            ),
+                            Text(
+                              'Click here',
+                              style: TextStyle(
+                                  fontSize: 10, color: Colors.blueGrey),
+                            )
+                          ],
+                        )),
+                  ),
+                ),
                  Step(
                     title: const Text('Publish'),
                     content: Column(
@@ -316,19 +396,11 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                           style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w500,
-                              color: Colors.blueGrey),),
-
-
+                              color: Colors.blueGrey),)
 
                       ],
                     )),
               ],
-              // onStepTapped: (newStep) {
-              //   setState(() {
-              //     _currentStep = newStep;
-              //   });
-              //   print(_currentStep);
-              // },
               onStepContinue: () {
                 if (_currentStep != 6) {
                   _currentStep++;
@@ -338,16 +410,20 @@ class _ProductInfoPageState extends State<ProductInfoPage> {
                   {
                     if(productNameController.text.isEmpty || productPriceController.text.isEmpty || productDetailsController.text.isEmpty|| productMaterialsUsedController.text.isEmpty || image_url=='')
                       {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fill all required details')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fill all required details')));
+                      }
+                    else if(isGlbloding || isloading)
+                      {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Wait till 3D modal get uploaded completely...')));
                       }
                     else
                       {
                       setState((){
                       isPublishing=true;
                       });
-
                         NewProduct newProduct=NewProduct(productNameController.text, productPriceController.text, productDetailsController.text, productMaterialsUsedController.text, image_url, glb_file_url);
                         publishProduct(newProduct).then((value) => {
+                          print(glb_file_url),
                       setState((){
                       isPublishing=false;
                       })
@@ -391,7 +467,6 @@ class _PublishingScreenState extends State<PublishingScreen> {
         Text('We are publishing your product...',style: TextStyle(color: Colors.blueGrey,fontSize: 15,fontWeight: FontWeight.w500),),
         SizedBox(height: 10,),
         Text('It will take some time please wait.',style: TextStyle(color: Colors.blueGrey,fontSize: 10,fontWeight: FontWeight.w500),)
-
       ],
     );
   }

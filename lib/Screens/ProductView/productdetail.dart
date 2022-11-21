@@ -89,30 +89,10 @@ class _ProductDetailsState extends State<ProductDetails> {
             backgroundColor: Colors.transparent,//const Color.fromRGBO(44, 53, 57, 1),
             expandedHeight: 320,//(450*size.height)/897.2549187389994,
             flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  children: [
-                        // ignore: prefer_const_constructors
+                background:                     // ignore: prefer_const_constructors
                 Center(child: Image.network(image,fit: BoxFit.contain,)),
-                    Positioned(
-                      bottom: 10,
-                      right: 5,
-                      child: Card(
-                        elevation: 2,
-                        child: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
 
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50)
-                          ),
-                          child: Icon(Icons.view_array_outlined)
-                        ),
-                      ),
-                    )
 
-                  ],
-                )
     )
           ),
             SliverToBoxAdapter(
