@@ -46,6 +46,7 @@ dependencies:
   firebase_core: ^1.17.0
   badges: ^2.0.3
   like_button: ^2.0.4
+  another_flushbar: ^1.12.29
   flutter:
     sdk: flutter
 

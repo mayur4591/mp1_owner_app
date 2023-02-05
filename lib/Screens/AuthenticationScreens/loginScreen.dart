@@ -1,6 +1,9 @@
+import 'package:another_flushbar/flushbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:owner_app/Screens/AuthenticationScreens/forgetPassword.dart';
 import 'package:owner_app/Screens/AuthenticationScreens/signUpScreen.dart';
 
 import '../HomeScreens/homeScreen.dart';
@@ -107,6 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: () {
                     //forgot password screen
+                    Navigator.push(context, MaterialPageRoute(builder:(context)=> const ForgetPassword()));
                   },
                   child: const Text(
                     'Forgot Password?',
@@ -179,94 +183,58 @@ class _LoginScreenState extends State<LoginScreen> {
                     )
                   ],
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Center(
-                    child: Text(
-                  'Or',
-                  style: TextStyle(
-                      color: Colors.white.withOpacity(0.8), fontSize: 20),
-                )),
-                const SizedBox(
-                  height: 10,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 28.0, right: 28, top: 10),
-                  child: Divider(
-                    height: 4,
-                    color: Colors.white,
-                    thickness: 1,
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(38.0),
-                  child: Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: TextButton(
-                        style: ButtonStyle(
-                            foregroundColor:
-                                MaterialStateProperty.all<Color>(Colors.red),
-                            shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(28.0),
-                                    side: BorderSide(
-                                        color:
-                                            Colors.white.withOpacity(0.7))))),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 5.0, bottom: 5.0),
-                              child: SvgPicture.asset(
-                                  'assets/images/googleIcon.svg'),
-                            ),
-                            const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
-                            )
-                            //Text('Sign in',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
-                          ],
-                        ),
-                        onPressed: () {
-                          print(emailController.text);
-                          print(passwordController.text);
-                          if (emailController.text.isEmpty ||
-                              passwordController.text.isEmpty) {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              content: Text('Fill all the details'),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: Colors.white,
-                            ));
-                          } else {
-                            doSignInUser(
-                                emailController.text, passwordController.text);
-                          }
-                        },
-                      )),
-                ),
+
               ],
             ),
           )),
     );
   }
-
+  String role="";
   Future  doSignInUser(String email, String password) async {
    await FirebaseAuth.instance
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) => {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => const HomeScren()))
-            });
+       FirebaseDatabase.instance.reference().child('Users/all_users/${FirebaseAuth.instance.currentUser!.uid}').once().then((value)  {
+         if(value.snapshot.value!=null)
+           {
+             Map<dynamic,dynamic> map=value.snapshot.value as Map;
+             setState((){
+               role=map['role'];
+             });
+           }
+
+         if(role=="owner")
+         {
+           Navigator.pushReplacement(context,
+               MaterialPageRoute(builder: (context) => const HomeScren()));
+         }
+         else
+         {
+           Flushbar(
+             title:  "Sign in failed",
+             titleColor: Colors.black,
+             backgroundColor: Colors.white,
+             message:  "You do not have permission for this application",
+             messageColor: Colors.black,
+             duration:  Duration(seconds: 3),
+           ).show(context);
+
+         }
+       }), })
+       .onError((error, stackTrace) => {
+        showError(error)
+
+   });
+  }
+
+  showError(Object? error) {
+    Flushbar(
+      title:  "Sign in failed",
+      titleColor: Colors.black,
+      backgroundColor: Colors.white,
+      message:  error.toString(),
+      messageColor: Colors.black,
+      duration:  Duration(seconds: 3),
+    ).show(context);
   }
 }

@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 
 import '../../Models/newUser.dart';
 import 'VerifyUser.dart';
@@ -381,64 +380,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       },
                     )
                   ],
-                ),
-                Center(
-                    child: Text(
-                  'Or',
-                  style: TextStyle(
-                      color: Colors.white.withOpacity(0.8), fontSize: 20),
-                )),
-                const SizedBox(
-                  height: 10,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(left: 28.0, right: 28, top: 10),
-                  child: Divider(
-                    height: 4,
-                    color: Colors.white,
-                    thickness: 1,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(38.0),
-                  child: Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: TextButton(
-                        style: ButtonStyle(
-                            foregroundColor:
-                                MaterialStateProperty.all<Color>(Colors.red),
-                            shape: MaterialStateProperty.all<
-                                    RoundedRectangleBorder>(
-                                RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(28.0),
-                                    side: BorderSide(
-                                        color:
-                                            Colors.white.withOpacity(0.7))))),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 5.0, bottom: 5.0),
-                              child: SvgPicture.asset(
-                                  'assets/images/googleIcon.svg'),
-                            ),
-                            const Text(
-                              'Sign In',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
-                            )
-                            //Text('Sign in',style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),),
-                          ],
-                        ),
-                        onPressed: () {
-                          print(firstnameController.text);
-                          print(passwordController.text);
-                        },
-                      )),
                 ),
               ],
             ),

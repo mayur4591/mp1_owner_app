@@ -9,6 +9,7 @@ import 'package:model_viewer_plus/model_viewer_plus.dart';
 
 import '../../Models/productmodel.dart';
 import '../CartScreen/cartScreen.dart';
+import '../HomeScreens/modelView.dart';
 
 class ProductDetails extends StatefulWidget {
   // const ProductDetails({Key? key}) : super(key: key);
@@ -19,11 +20,12 @@ class ProductDetails extends StatefulWidget {
   String name;
   String materials;
   String details;
+  String glb_url;
   @override
   // ignore: no_logic_in_create_state
-  State<ProductDetails> createState() => _ProductDetailsState(image,price,name,details,materials);
+  State<ProductDetails> createState() => _ProductDetailsState(image,price,name,details,materials,glb_url);
 
-  ProductDetails(this.image, this.price, this.name,this.details,this.materials);
+  ProductDetails(this.image, this.price, this.name,this.details,this.materials,this.glb_url);
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
@@ -33,9 +35,10 @@ class _ProductDetailsState extends State<ProductDetails> {
   String name;
   String details;
   String materials;
+  String model;
 
 
-  _ProductDetailsState(this.image, this.price, this.name,this.details,this.materials);
+  _ProductDetailsState(this.image, this.price, this.name,this.details,this.materials,this.model);
 
   int orderRequest=0;
   Future requestCount() async
@@ -128,41 +131,11 @@ class _ProductDetailsState extends State<ProductDetails> {
                         buildSizedBox(18),
                         ListTile(
                           title: Text(name,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500),),
-                          // subtitle: const Text('3-set sofa,grey',
-                          //   style: TextStyle(
-                          //       color: Colors.white,
-                          //       fontSize: 14,
-                          //       fontWeight: FontWeight.w100),
-                          // ),
-                          trailing: IconButton(
-                            onPressed: () {
-                              Product product= Product(image, name, price);
-                                    productList.add(product);
-                                    wishListCount=productList.length;
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(30),
-                                        ),
-                                        child: const Text('Element added to cart...',style: TextStyle(color: Colors.black),),
-                                      ),
-                                      backgroundColor: Colors.white,
-                                    behavior: SnackBarBehavior.floating,
-                                    duration: const Duration(seconds: 2),
-                                      margin: EdgeInsets.only(bottom: 40,left: 20,right: 20),
-                                    )
-                                    );
-                                  setState((){
-                                  });
-                            },
-                            icon: const Icon(
-                              Icons.add_shopping_cart_sharp,
-                              color: Colors.white,
-                            ),
-                          ),
+
                         ),
                         buildSizedBox(14),
                          Padding(
@@ -347,6 +320,27 @@ class _ProductDetailsState extends State<ProductDetails> {
             ),
           ),
         ),
+        GestureDetector(
+          onTap: ()
+          {
+            print(model);
+            if(model.isNotEmpty) {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> ModelViewerScreen(model)));
+            } else
+            {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Model is not available for this product.',style: TextStyle(color: Colors.black)),backgroundColor: Colors.white,));
+            }
+          },
+          child: Container(margin:EdgeInsets.only(right: 10),child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.fullscreen_rounded,color: Colors.white,size: 25,),
+              SizedBox(height: 1,),
+              Text('View in 3D',style: TextStyle(color: Colors.white,fontSize: 13),)
+            ],
+          )),
+        )
+
       ],
     );
   }

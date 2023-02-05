@@ -83,7 +83,8 @@ class _HomeScrenState extends State<HomeScren> {
                     product['product_price'],
                     product['product_name'],
                     product['product_details'],
-                    product['product_materials']
+                    product['product_materials'],
+                    product['glb_file_url']
                                     )));
       },
       child: Container(
